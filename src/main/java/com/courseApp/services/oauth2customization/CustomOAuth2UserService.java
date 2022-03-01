@@ -1,6 +1,8 @@
 package com.courseApp.services.oauth2customization;
 
+import com.courseApp.models.Role;
 import com.courseApp.models.RoleEnum;
+import com.courseApp.models.repositories.RoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.convert.converter.Converter;
@@ -35,13 +37,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             };
     private final Converter<OAuth2UserRequest, RequestEntity<?>> requestEntityConverter = new OAuth2UserRequestEntityConverter();
     private final RestOperations restOperations;
-    @Autowired
     private final AppUserInitiator githubInitiator;
+    private final RoleRepo roleRepo;
 
     @Autowired
     private final GrantAdminRoles grantAdminRoles;
-    public CustomOAuth2UserService(GithubInitiator githubInitiator, GrantAdminRoles grantAdminRoles) {
+    public CustomOAuth2UserService(GithubInitiator githubInitiator, RoleRepo roleRepo, GrantAdminRoles grantAdminRoles) {
         this.githubInitiator = githubInitiator;
+        this.roleRepo = roleRepo;
         this.grantAdminRoles = grantAdminRoles;
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
@@ -78,8 +81,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         .stream().map(Object::toString)
                         .anyMatch(x-> grantAdminRoles.adminAttributes()
                                 .containsValue(x))? RoleEnum.SCOPE_USER: RoleEnum.SCOPE_ADMIN;
+                var roleObject=roleRepo.findByName(role).orElseThrow();
                 authorities.add(new OAuth2UserAuthority(role.getValue(),userAttributes));
-                githubInitiator.saveNewAppUser(userAttributes,userNameAttributeName,role);
+                githubInitiator.saveNewAppUser(userAttributes,userNameAttributeName,roleObject);
                return new DefaultOAuth2User(authorities, userAttributes, userNameAttributeName);
             }
         }

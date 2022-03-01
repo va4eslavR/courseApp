@@ -10,4 +10,8 @@ public interface AppUserRepo extends JpaRepository<AppUser,String> {
         Optional<AppUser> findByEmail(String email);
         @NotNull
         Optional<AppUser>findById(String id);
+
+        boolean existsByEmail(String email);
+        boolean existsById(String id);
+        boolean existsByName(String name);
 }

@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "uzers")
 public class AppUser {
  @Id
- @Column(unique = true)
+ @Column(name ="id",unique = true,nullable = false)
  private String id;
  private String name;
  @Column(name = "email",nullable = false,unique = true)

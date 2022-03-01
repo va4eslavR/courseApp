@@ -1,5 +1,6 @@
 package com.courseApp.services.oauth2customization;
 
+import com.courseApp.models.repositories.RoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 public class CustomOidcService extends OidcUserService {
 
     private final AppUserInitiator googleInitiator;
+    private final RoleRepo roleRepo;
     private final GrantAdminRoles grantAdminRoles;
     private static final String INVALID_USER_INFO_RESPONSE_ERROR_CODE = "invalid_user_info_response";
     private static final Converter<Map<String, Object>, Map<String, Object>> DEFAULT_CLAIM_TYPE_CONVERTER =
@@ -40,17 +42,15 @@ public class CustomOidcService extends OidcUserService {
     private final Function<ClientRegistration, Converter<Map<String, Object>, Map<String, Object>>> claimTypeConverterFactory =
             (clientRegistration) -> DEFAULT_CLAIM_TYPE_CONVERTER;
     @Autowired
-    public CustomOidcService(GoogleInitiator googleInitiator, GrantAdminRoles grantAdminRoles) {
+    public CustomOidcService(GoogleInitiator googleInitiator, RoleRepo roleRepo, GrantAdminRoles grantAdminRoles) {
         this.googleInitiator = googleInitiator;
+        this.roleRepo = roleRepo;
         this.grantAdminRoles = grantAdminRoles;
     }
 
-
     private static Converter<Object, ?> getConverter(TypeDescriptor targetDescriptor) {
         TypeDescriptor sourceDescriptor = TypeDescriptor.valueOf(Object.class);
-        return (source) -> {
-            return ClaimConversionService.getSharedInstance().convert(source, sourceDescriptor, targetDescriptor);
-        };
+        return (source) -> ClaimConversionService.getSharedInstance().convert(source, sourceDescriptor, targetDescriptor);
     }
 
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -75,7 +75,8 @@ public class CustomOidcService extends OidcUserService {
         var role=grantAdminRoles.getRole(userRequest.getIdToken().getClaims());
 
         authorities.add(new OidcUserAuthority(role.getValue(),userRequest.getIdToken(), userInfo));
-        googleInitiator.saveNewAppUser(userRequest.getIdToken().getClaims(),userRequest.getIdToken().getEmail(),role);
+        var roleObject=roleRepo.findByName(role).orElseThrow();
+        googleInitiator.saveNewAppUser(userRequest.getIdToken().getClaims(),userRequest.getIdToken().getEmail(),roleObject);
         return this.getUser(userRequest, userInfo, authorities);
     }
 

@@ -1,5 +1,6 @@
 package com.courseApp.services.oauth2customization;
 
+import com.courseApp.models.Role;
 import com.courseApp.models.RoleEnum;
 import com.courseApp.models.AppUser;
 import com.courseApp.models.repositories.AppUserRepo;
@@ -18,7 +19,7 @@ public class GithubInitiator implements AppUserInitiator{
     }
 
     @Override
-    public void saveNewAppUser(Map<String, Object> userAttributes, String id, RoleEnum roleEnum){
+    public void saveNewAppUser(Map<String, Object> userAttributes, String id, Role roleEnum){
         var entity= appUserRepo.findByEmail((String) userAttributes.get("email"))
                 .or(()->appUserRepo.findById(id))
                 .orElseGet(()-> initAppUser(userAttributes,new AppUser(), roleEnum));
@@ -27,14 +28,14 @@ public class GithubInitiator implements AppUserInitiator{
     }
 
     @Override
-    public  AppUser initAppUser(Map<String, Object> userAttributes, AppUser appUser, RoleEnum roleEnum) {
+    public  AppUser initAppUser(Map<String, Object> userAttributes, AppUser appUser, Role roleEnum) {
             appUser.setEmail((String) (userAttributes.get("email") != null ?
                     userAttributes.get("email") : userAttributes.get("id").toString()));
             appUser.setGender((String) userAttributes.get("gender"));
             appUser.setId(userAttributes.get("id").toString());
             appUser.setName((String) userAttributes.get("login"));
             appUser.setPicture((String) userAttributes.get("avatar_url"));
-            appUser.setRoleEnum(roleEnum);
+            appUser.getRole().add(roleEnum);
             return appUser;
         }
 }

@@ -1,5 +1,6 @@
 package com.courseApp.services.oauth2customization;
 
+import com.courseApp.models.Role;
 import com.courseApp.models.RoleEnum;
 import com.courseApp.models.AppUser;
 import com.courseApp.models.repositories.AppUserRepo;
@@ -18,20 +19,20 @@ public class GoogleInitiator implements AppUserInitiator{
     }
 
     @Override
-    public void saveNewAppUser(Map<String, Object> userAttributes, String name, RoleEnum roleEnum) {
-        var entity= appUserRepo.findByEmail(name).orElseGet(()-> initAppUser(userAttributes,new AppUser(), roleEnum));
+    public void saveNewAppUser(Map<String, Object> userAttributes, String name, Role role) {
+        var entity= appUserRepo.findByEmail(name).orElseGet(()-> initAppUser(userAttributes,new AppUser(), role));
         entity.setLastSeen(LocalDateTime.now());
         appUserRepo.save(entity);
     }
 
     @Override
-    public AppUser initAppUser(Map<String, Object> attributes, AppUser appUser, RoleEnum roleEnum) {
+    public AppUser initAppUser(Map<String, Object> attributes, AppUser appUser, Role roleEnum) {
         appUser.setEmail((String) attributes.get("email"));
         appUser.setGender((String) attributes.get("gender"));
         appUser.setId((String) attributes.get("sub"));
         appUser.setName((String) attributes.get("name"));
         appUser.setPicture((String) attributes.get("picture"));
-        appUser.setRoleEnum(roleEnum);
+        appUser.getRole().add(roleEnum);
         return appUser;
     }
 }
