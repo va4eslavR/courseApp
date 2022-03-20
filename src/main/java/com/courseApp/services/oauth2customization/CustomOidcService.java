@@ -75,7 +75,7 @@ public class CustomOidcService extends OidcUserService {
         var role=grantAdminRoles.getRole(userRequest.getIdToken().getClaims());
 
         authorities.add(new OidcUserAuthority(role.getValue(),userRequest.getIdToken(), userInfo));
-        var roleObject=roleRepo.findByName(role).orElseThrow();
+        var roleObject=roleRepo.findByRole(role).orElseThrow();
         googleInitiator.saveNewAppUser(userRequest.getIdToken().getClaims(),userRequest.getIdToken().getEmail(),roleObject);
         return this.getUser(userRequest, userInfo, authorities);
     }

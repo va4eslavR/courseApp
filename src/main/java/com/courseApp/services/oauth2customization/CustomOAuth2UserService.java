@@ -1,7 +1,5 @@
 package com.courseApp.services.oauth2customization;
 
-import com.courseApp.models.Role;
-import com.courseApp.models.RoleEnum;
 import com.courseApp.models.repositories.RoleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -77,11 +75,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 Map<String, Object> userAttributes = response.getBody();
                 Set<GrantedAuthority> authorities = new LinkedHashSet<>();
                 assert userAttributes != null;
-                var role=userAttributes.values()
-                        .stream().map(Object::toString)
-                        .anyMatch(x-> grantAdminRoles.adminAttributes()
-                                .containsValue(x))? RoleEnum.SCOPE_USER: RoleEnum.SCOPE_ADMIN;
-                var roleObject=roleRepo.findByName(role).orElseThrow();
+                var role=grantAdminRoles.getRole(userAttributes);
+                var roleObject=roleRepo.findByRole(role).orElseThrow();
                 authorities.add(new OAuth2UserAuthority(role.getValue(),userAttributes));
                 githubInitiator.saveNewAppUser(userAttributes,userNameAttributeName,roleObject);
                return new DefaultOAuth2User(authorities, userAttributes, userNameAttributeName);

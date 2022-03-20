@@ -7,6 +7,7 @@ import com.courseApp.models.repositories.AppUserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Map;
 @Component
@@ -23,7 +24,7 @@ public class GithubInitiator implements AppUserInitiator{
         var entity= appUserRepo.findByEmail((String) userAttributes.get("email"))
                 .or(()->appUserRepo.findById(id))
                 .orElseGet(()-> initAppUser(userAttributes,new AppUser(), roleEnum));
-        entity.setLastSeen(LocalDateTime.now());
+        entity.setLastSeen(Timestamp.valueOf(LocalDateTime.now()));
         appUserRepo.save(entity);
     }
 

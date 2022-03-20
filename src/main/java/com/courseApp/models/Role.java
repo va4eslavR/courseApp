@@ -19,7 +19,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Enumerated(EnumType.STRING)
-    private RoleEnum name;
+    private RoleEnum role;
 
     @Override
     public boolean equals(Object o) {
