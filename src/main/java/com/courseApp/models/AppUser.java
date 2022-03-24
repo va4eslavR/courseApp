@@ -5,7 +5,7 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -13,7 +13,8 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "uzers")
 public class AppUser {
  @Id
@@ -24,7 +25,9 @@ public class AppUser {
  @Column(name = "email",nullable = false,unique = true)
  private String email;
  private String gender;
+ @Column(name = "last_seen")
  private Timestamp lastSeen;
+ @Column(name = "password")
  private String password;
  private String picture;
  @Enumerated(EnumType.STRING)
@@ -32,8 +35,14 @@ public class AppUser {
  @JoinTable(name = "uzers_roles",
  joinColumns = @JoinColumn(name = "uzer_id"),
  inverseJoinColumns = @JoinColumn(name = "role_id"))
- private Set<Role> role;
-
+ @ToString.Exclude
+ private Set<Role> role=new HashSet<>();
+ @OneToMany(mappedBy = "authorId",cascade = CascadeType.ALL)
+ @ToString.Exclude
+ private Set<InfoPost> infoPosts;
+ @OneToMany(mappedBy = "reader",cascade = CascadeType.ALL,orphanRemoval = true)
+ @ToString.Exclude
+ private Set<Rate> rates=new HashSet<>();
 
  @Override
  public boolean equals(Object o) {
@@ -48,5 +57,4 @@ public class AppUser {
  public int hashCode() {
   return getClass().hashCode();
  }
-
 }

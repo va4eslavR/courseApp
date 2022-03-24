@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
 
 @Component
 public class JwtUtils {
-    private  Logger logger= LoggerFactory.getLogger(this.getClass());
+    private final Logger logger= LoggerFactory.getLogger(this.getClass());
     @Value("${app.jwtSecret}")
     private String jwtSecret;
     @Value("${app.jwtExpirationMs}")
@@ -21,20 +22,21 @@ public class JwtUtils {
     public String generateJwtToken(Authentication auth){
         AppUserDetails appUserDetails=(AppUserDetails) auth.getPrincipal();
         return Jwts.builder()
-                .setSubject(appUserDetails.getEmail()) //Change username for unique email field!!
+                .setSubject(appUserDetails.getEmail())
+                .setId(appUserDetails.getId())
+                .setClaims(Collections.singletonMap("UserName",appUserDetails.getUsername()))//Change username for unique email field!!
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime()+jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512,jwtSecret)
                 .compact();
     }
-    public String getUsernameFromToken(String token){
+    public String getEmailFromToken(String token){
         var body= Jwts.parser().setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
-        logger.info("got token with username " + body.getSubject()+"/n"+
-                "with id: "+body.getId() +"/n"+
-                "with email: "+body.get("email",String.class));
-
+        logger.info("got token with email: " + body.getSubject()+"\n"+
+                "\twith id: "+body.getId() +"\n"+
+                "\twith name: "+body.get("UserName"));
         return body.getSubject();
     }
     public boolean validateJwtToken(String token){

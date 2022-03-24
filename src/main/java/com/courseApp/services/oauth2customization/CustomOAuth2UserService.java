@@ -1,6 +1,7 @@
 package com.courseApp.services.oauth2customization;
 
 import com.courseApp.models.repositories.RoleRepo;
+import com.courseApp.utility.GrantAdminRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.convert.converter.Converter;
