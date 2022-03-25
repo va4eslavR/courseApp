@@ -134,8 +134,7 @@ public class InfoPostService {
     }
 
     public void deletePost(InfoPostDeleteRequest deleteRequest) {
-        if (deleteRequest.getAuthor().equals(
-                Utility.getCurrentUser().getUsername()))
+        if (deleteRequest.getAuthor().equals(Utility.getCurrentUser().getId()))
             infoPostRepo.deleteById(deleteRequest.getId());
     }
 
