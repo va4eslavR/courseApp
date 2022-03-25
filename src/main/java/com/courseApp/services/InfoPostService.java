@@ -1,31 +1,28 @@
 package com.courseApp.services;
 
-import com.courseApp.models.AppUserDetails;
-import com.courseApp.models.InfoPost;
-import com.courseApp.models.Rate;
-import com.courseApp.models.RateAssociationId;
+import com.courseApp.models.*;
 import com.courseApp.models.repositories.InfoPostRepo;
 import com.courseApp.models.repositories.RateRepo;
 import com.courseApp.payloads.*;
+import com.courseApp.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class InfoPostService {
 
     @Autowired
     private InfoPostRepo infoPostRepo;
-    @Autowired
-    private AttachmentPhotoService attachmentPhotoService;
     @Autowired
     private RateRepo rateRepo;
     @Autowired
@@ -45,10 +42,9 @@ public class InfoPostService {
     }
 
     public Integer likeDislike(Long infoId, Integer value) {
-        if (value < -1 || value > 1) throw new IllegalArgumentException();
-        var user = (AppUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        var id = new RateAssociationId(user.getId(), infoId);
-        if (!rateRepo.existsById(id)) rateRepo.insert(infoId, value, user.getId());
+        if (value < -1 || value > 1||infoId==null) throw new IllegalArgumentException();
+        var id = new RateAssociationId(Utility.getCurrentUser().getId(), infoId);
+        if (!rateRepo.existsById(id)) rateRepo.insert(infoId, value, Utility.getCurrentUser().getId());
         return buttonLogicUpdate(rateRepo.findById(id).orElseThrow(), value);
     }
 
@@ -59,12 +55,41 @@ public class InfoPostService {
         return score;
     }
 
-    public List<GetPublicPostsResponse> getPublicPosts() {
-        return new ArrayList<>();
+    public List<PublicPostsResponse> getPublicPosts() {
+        return infoPostRepo.findAll()
+                .stream()
+                .map(this::infoPostToPublicDao)
+                .collect(Collectors.toList());
     }
 
-    public List<GetAuthenticatedPostsResponse> getAuthPosts() {
-        return new ArrayList<>();
+    public List<PrivatePostsResponse> getPrivatePosts() {
+        return infoPostRepo.findAll().stream().map(x -> {
+            var item = new PrivatePostsResponse();
+            item.setPublicPostsResponse(infoPostToPublicDao(x));
+            var ownerEmail = Utility.getCurrentUser().getEmail();
+            item.setOwner(x.getAuthorId().getEmail().equals(ownerEmail));
+            var rateVal = x.getRates()
+                    .stream()
+                    .filter(rate -> rate.getReader().getEmail().equals(ownerEmail))
+                    .findFirst()
+                    .orElse(null);
+            item.setRate(rateVal == null ? 0 : rateVal.getScore());
+            return item;
+        }).collect(Collectors.toList());
+    }
+
+    public PublicPostsResponse infoPostToPublicDao(InfoPost post) {
+        var item = new PublicPostsResponse();
+        item.setId(post.getId());
+        item.setCreationDate(post.getCreationDate());
+        item.setAuthor(post.getAuthorId().getId());
+        item.setTopic(post.getTopic());
+        item.setTheme(post.getTheme().getName());
+        item.setText(post.getText());
+        item.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()));
+        item.setPhotos(post.getPhotos().stream().map(AttachmentPhoto::getPhoto).collect(Collectors.toSet()));
+        item.setRating(post.getRates().stream().map(Rate::getScore).count());
+        return item;
     }
 
     public InfoPostEditToolsResponse getTools() {
@@ -74,14 +99,19 @@ public class InfoPostService {
         return rez;
     }
 
-    public void insertPost(InfoPostCreateRequest request) {
+    private void setTags(InfoPost post, Set<String> tags) {
+        expandKnownTags(tags);
+        tagService.getTagsByNames(tags).forEach(post::addTag);
+    }
+
+    public void insertPost(PostCreateRequest request) {
+        logger.info("tags from request first line:"+String.join(",", request.getTags()));
         var post = new InfoPost();
         var now = Timestamp.valueOf(LocalDateTime.now());
-        expandKnownTags(request.getTags());
-        post.setAuthorId(appUserDetailsService.getById(
-                ((AppUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId()));
+        post.setAuthorId(appUserDetailsService.getById(Utility.getCurrentUser().getId()));
         post.setLastModified(now);
-        attachmentPhotoService.photosToAttachments(request.getPhotos()).forEach(post::addPhoto);
+        Utility.photosToAttachments(request.getPhotos()).forEach(post::addPhoto);
+        expandKnownTags(request.getTags());
         tagService.getTagsByNames(request.getTags()).forEach(post::addTag);
         post.setTheme(themeService.getByName(request.getTheme()));
         post.setTopic(request.getTopic());
@@ -90,13 +120,27 @@ public class InfoPostService {
         infoPostRepo.save(post);
     }
 
+    public void updatePost(PostUpdateRequest request) {
+        var post = infoPostRepo.findById(request.getId()).orElseThrow();
+        if (StringUtils.hasText(request.getText()))
+            post.setText(request.getText());
+        post.getTags().clear();
+        if (request.getTags().size() > 0)
+            setTags(post, request.getTags());
+        post.getPhotos().clear();
+        if (request.getPhotos().size() > 0)
+            Utility.photosToAttachments(request.getPhotos()).forEach(post::addPhoto);
+        infoPostRepo.save(post);
+    }
+
     public void deletePost(InfoPostDeleteRequest deleteRequest) {
         if (deleteRequest.getAuthor().equals(
-                ((AppUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername()))
+                Utility.getCurrentUser().getUsername()))
             infoPostRepo.deleteById(deleteRequest.getId());
     }
 
-    private void expandKnownTags(Set<String> extras) {
+    private void expandKnownTags(Set<String> tags) {
+        var extras=new HashSet<>(tags);
         if (extras.removeAll(knownTags)) {
             tagService.insertTags(extras);
             knownTags.addAll(extras);

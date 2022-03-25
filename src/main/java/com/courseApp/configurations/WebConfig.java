@@ -72,7 +72,7 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests().antMatchers( "/api/auth/**").permitAll()
-                .antMatchers("/api/test/**").permitAll()
+                .antMatchers("/api/test/**","/api/info/public").permitAll()
                 .anyRequest().authenticated();
                 /*.and()
                 .oauth2Login(x->x.userInfoEndpoint()

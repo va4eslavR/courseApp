@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class InfoPostDislikeRequest {
-    String user;
+    Integer value;
     Long post;
 }

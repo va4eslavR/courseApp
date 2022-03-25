@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Set;
 
 @Data
-public class InfoPostCreateRequest {
+public class PostCreateRequest {
     private String author;
     private String text;
     private Set<String>tags;

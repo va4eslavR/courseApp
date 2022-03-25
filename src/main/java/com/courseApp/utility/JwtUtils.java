@@ -21,19 +21,24 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication auth){
         AppUserDetails appUserDetails=(AppUserDetails) auth.getPrincipal();
+            logger.info("appuserdetails\n"+"name \t"+appUserDetails.getUsername());
+        logger.info("appuserdetails\n"+"email \t"+appUserDetails.getEmail());
+        logger.info("appuserdetails\n"+"email \t"+appUserDetails.getId());
         return Jwts.builder()
                 .setSubject(appUserDetails.getEmail())
                 .setId(appUserDetails.getId())
-                .setClaims(Collections.singletonMap("UserName",appUserDetails.getUsername()))//Change username for unique email field!!
-                .setIssuedAt(new Date())
+                //.setClaims(Collections.singletonMap("UserName",appUserDetails.getUsername()))//Change username for unique email field!!
+                .setIssuedAt(new Date (new Date().getTime()))
                 .setExpiration(new Date((new Date()).getTime()+jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512,jwtSecret)
+                //.setClaims(Collections.singletonMap("UserName",appUserDetails.getUsername()))
                 .compact();
     }
     public String getEmailFromToken(String token){
         var body= Jwts.parser().setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
+                .parseClaimsJws(token).getBody();
+
+        logger.info(body.toString());
         logger.info("got token with email: " + body.getSubject()+"\n"+
                 "\twith id: "+body.getId() +"\n"+
                 "\twith name: "+body.get("UserName"));

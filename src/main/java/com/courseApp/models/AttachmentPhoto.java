@@ -1,5 +1,6 @@
 package com.courseApp.models;
 
+import com.courseApp.payloads.Photo;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -28,6 +29,15 @@ public class AttachmentPhoto {
     String thumb;
     @Column(name = "medium")
     String medium;
+
+    public Photo getPhoto(){
+        var rez= new Photo();
+        rez.setAddress(this.address);
+        rez.setMedium(this.medium);
+        rez.setDeleteLink(this.deleteLink);
+        rez.setThumb(this.thumb);
+        return rez;
+    }
 
 
     @Override

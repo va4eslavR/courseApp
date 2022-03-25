@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -16,13 +17,14 @@ import java.util.Set;
 @Entity
 public class Tag {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
     @Column(name = "name",nullable = false,unique = true)
     private String name;
     @ManyToMany(mappedBy = "tags")
     @ToString.Exclude
-    private Set<InfoPost>infoPosts;
+    private Set<InfoPost>infoPosts=new HashSet<>();
 
 
     @Override

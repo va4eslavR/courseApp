@@ -8,4 +8,5 @@ public class Photo {
     String deleteLink;
     String thumb;
     String medium;
+
 }

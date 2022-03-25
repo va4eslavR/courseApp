@@ -31,7 +31,7 @@ public class AppUser {
  private String password;
  private String picture;
  @Enumerated(EnumType.STRING)
- @ManyToMany
+ @ManyToMany(fetch = FetchType.EAGER)
  @JoinTable(name = "uzers_roles",
  joinColumns = @JoinColumn(name = "uzer_id"),
  inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -39,7 +39,7 @@ public class AppUser {
  private Set<Role> role=new HashSet<>();
  @OneToMany(mappedBy = "authorId",cascade = CascadeType.ALL)
  @ToString.Exclude
- private Set<InfoPost> infoPosts;
+ private Set<InfoPost> infoPosts=new HashSet<>();
  @OneToMany(mappedBy = "reader",cascade = CascadeType.ALL,orphanRemoval = true)
  @ToString.Exclude
  private Set<Rate> rates=new HashSet<>();

@@ -9,6 +9,7 @@ import com.courseApp.payloads.JwtResponse;
 import com.courseApp.payloads.SignupRequest;
 import com.courseApp.utility.GrantAdminRoles;
 import com.courseApp.utility.JwtUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,17 +23,17 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-
+@RequiredArgsConstructor
 @Service
 public class AppUserDetailsService implements UserDetailsService {
     @Autowired
-    private AppUserRepo appUserRepo;
+    private final AppUserRepo appUserRepo;
     @Autowired
-    private RoleRepo roleRepo;
+    private final RoleRepo roleRepo;
     @Autowired
-    private GrantAdminRoles grantAdminRoles;
+    private final GrantAdminRoles grantAdminRoles;
     @Autowired
-    private JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

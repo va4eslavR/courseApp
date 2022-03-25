@@ -30,12 +30,13 @@ public class InfoPost {
     @ManyToOne(optional = false)
     @JoinColumn(name = "author_id")
     private AppUser authorId;
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST,
+    CascadeType.MERGE})
     @JoinTable(name = "infoposts_tags",
             joinColumns = @JoinColumn(name = "postid"),
             inverseJoinColumns = @JoinColumn(name = "tagid"))
     @ToString.Exclude
-    private Set<Tag> tags;
+    private Set<Tag> tags=new HashSet<>();
     @OneToMany(mappedBy = "post")
     @ToString.Exclude
     private Set<Rate> rates = new HashSet<>();
@@ -65,8 +66,8 @@ public class InfoPost {
         tag.getInfoPosts().add(this);
     }
 
-    public void removeTag(Long tagId) {
-        var tag = tags.stream().filter(x -> x.getId().equals(tagId))
+    public void removeTag(String tagName) {
+        var tag = tags.stream().filter(x -> x.getName().equals(tagName))
                 .findFirst().orElse(null);
         if (tag != null) {
             tags.remove(tag);
@@ -81,9 +82,4 @@ public class InfoPost {
         this.photos.stream().filter(x -> x.getId().equals(id))
                 .findFirst().ifPresent(photo -> photos.remove(photo));
     }
-
-    public void getRate(String userId) {
-
-    }
-
 }

@@ -28,10 +28,11 @@ public class AuthRestController {
     protected AuthenticationManager authenticationManager;
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        logger.info("get"+loginRequest.getEmail()+loginRequest.getPassword());
         var authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        return ResponseEntity.ok(
-                appUserDetailsService.login(authentication));
+        var item=appUserDetailsService.login(authentication);
+        return ResponseEntity.ok(item);
     }
 
     @PostMapping("/signup")
