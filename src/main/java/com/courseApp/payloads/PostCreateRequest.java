@@ -6,7 +6,6 @@ import java.util.Set;
 
 @Data
 public class PostCreateRequest {
-    private String author;
     private String text;
     private Set<String>tags;
     private Set<Photo>photos;

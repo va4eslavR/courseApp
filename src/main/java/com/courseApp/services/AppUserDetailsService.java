@@ -56,8 +56,8 @@ public class AppUserDetailsService implements UserDetailsService {
     }
 
     public String existsByIdEmail(String email, String name) {
-        if (!appUserRepo.existsByEmail(email)) return "email";
-        if (!appUserRepo.existsByName(name)) return "name";
+        if (appUserRepo.existsByEmail(email)) return "email";
+        if (appUserRepo.existsByName(name)) return "name";
         return "success";
     }
     public AppUser getById(String id){

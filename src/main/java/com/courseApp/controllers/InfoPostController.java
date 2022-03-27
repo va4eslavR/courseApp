@@ -62,7 +62,7 @@ public class InfoPostController {
         return ResponseEntity.ok().body(infoPostService.getPublicPosts());
     }
 
-    @GetMapping("/authorized")
+    @GetMapping("/private")
     public ResponseEntity<?> getAuthorizedPosts() {
         return ResponseEntity.ok().body(infoPostService.getPrivatePosts());
     }
