@@ -39,7 +39,7 @@ public class AuthRestController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         var rez = appUserDetailsService.existsByIdEmail(signupRequest.getEmail(), signupRequest.getUsername());
         if (rez.equals("success")) {
-            String pw=signupRequest.getPassword();
+
             signupRequest.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
             appUserDetailsService.insertNewUser(signupRequest);
             return ResponseEntity
