@@ -19,7 +19,6 @@ public class Utility {
             item.setAddress(x.getAddress());
             item.setDeleteLink(x.getDeleteLink());
             item.setThumb(x.getThumb());
-            item.setMedium(x.getMedium());
             return item;
         }).collect(Collectors.toSet());
     }

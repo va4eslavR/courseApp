@@ -27,13 +27,11 @@ public class AttachmentPhoto {
     String deleteLink;
     @Column(name="thumb")
     String thumb;
-    @Column(name = "medium")
-    String medium;
 
     public Photo getPhoto(){
         var rez= new Photo();
         rez.setAddress(this.address);
-        rez.setMedium(this.medium);
+
         rez.setDeleteLink(this.deleteLink);
         rez.setThumb(this.thumb);
         return rez;
