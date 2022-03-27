@@ -2,8 +2,6 @@ package com.courseApp.configurations;
 
 import com.courseApp.filters.AuthTokenFilter;
 import com.courseApp.services.AppUserDetailsService;
-import com.courseApp.services.oauth2customization.CustomOAuth2UserService;
-import com.courseApp.services.oauth2customization.CustomOidcService;
 import com.courseApp.utility.AuthEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,15 +55,7 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-       /* http
-                .authorizeRequests()
-                .antMatchers("/","/authPage","/webjars/**").permitAll()
-                .anyRequest().authenticated()
-                .and().oauth2Login(x->x.userInfoEndpoint()
-                        .userService(oAuth2UserService)
-                        .oidcUserService(oidcUserService)
-                )
-                ;*/ //this part works for google and github tokens
+
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()
@@ -74,10 +64,7 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers( "/api/auth/**").permitAll()
                 .antMatchers("/api/test/**","/api/info/public").permitAll()
                 .anyRequest().authenticated();
-                /*.and()
-                .oauth2Login(x->x.userInfoEndpoint()
-                        .userService(oAuth2UserService)
-                        .oidcUserService(oidcUserService));*/
+
         http.addFilterBefore(authJWTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
