@@ -61,11 +61,12 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests().antMatchers( "/api/auth/**").permitAll()
-                .antMatchers("/api/test/**","/api/info/public").permitAll()
+                .authorizeRequests().antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/api/test/**", "/api/info/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authJWTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
     }
 
 }

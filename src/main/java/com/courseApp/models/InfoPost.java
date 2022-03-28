@@ -5,7 +5,10 @@ import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,25 +30,28 @@ public class InfoPost {
     private Timestamp lastModified;
     @Column(name = "topic")
     private String topic;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "author_id")
     private AppUser authorId;
-    @ManyToMany(cascade = {CascadeType.PERSIST,
-    CascadeType.MERGE})
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "infoposts_tags",
             joinColumns = @JoinColumn(name = "postid"),
             inverseJoinColumns = @JoinColumn(name = "tagid"))
-    @ToString.Exclude
-    private Set<Tag> tags=new HashSet<>();
+    private Set<Tag> tags = new LinkedHashSet<>();
+
     @OneToMany(mappedBy = "post")
     @ToString.Exclude
     private Set<Rate> rates = new HashSet<>();
-    @OneToMany(mappedBy = "infoPostId")
-    @ToString.Exclude
-    private Set<AttachmentPhoto> photos = new HashSet<>();
+
     @ManyToOne()
     @ToString.Exclude
     Theme theme;
+
+    @OneToMany(mappedBy = "infoPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<AttachmentPhoto> attachmentPhotos = new LinkedHashSet<>();
 
 
     @Override
@@ -74,12 +80,12 @@ public class InfoPost {
             tag.getInfoPosts().remove(this);
         }
     }
-    public void addPhoto(AttachmentPhoto photo){
-        this.photos.add(photo);
-        photo.setInfoPostId(this.id);
+    public void addPhoto(AttachmentPhoto photo) {
+        this.attachmentPhotos.add(photo);
+        photo.setInfoPost(this);
     }
-    public void removePhoto(Long id){
-        this.photos.stream().filter(x -> x.getId().equals(id))
-                .findFirst().ifPresent(photo -> photos.remove(photo));
+    public void removePhoto(Long id) {
+        this.attachmentPhotos.stream().filter(x -> x.getId().equals(id))
+                .findFirst().ifPresent(photo -> attachmentPhotos.remove(photo));
     }
 }

@@ -19,19 +19,20 @@ public class AttachmentPhoto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     Long id;
-    @Column(name = "infopost_id")
-    Long infoPostId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "infopost_id")
+    private InfoPost infoPost;
     @Column(name = "adress")
     String address;
-    @Column(name="delete_link")
+    @Column(name = "delete_link")
     String deleteLink;
-    @Column(name="thumb")
+    @Column(name = "thumb")
     String thumb;
 
-    public Photo getPhoto(){
+
+    public Photo getPhoto() {
         var rez= new Photo();
         rez.setAddress(this.address);
-
         rez.setDeleteLink(this.deleteLink);
         rez.setThumb(this.thumb);
         return rez;

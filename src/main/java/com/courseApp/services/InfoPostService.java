@@ -87,7 +87,7 @@ public class InfoPostService {
         item.setTheme(post.getTheme().getName());
         item.setText(post.getText());
         item.setTags(post.getTags().stream().map(Tag::getName).collect(Collectors.toSet()));
-        item.setPhotos(post.getPhotos().stream().map(AttachmentPhoto::getPhoto).collect(Collectors.toSet()));
+        item.setPhotos(post.getAttachmentPhotos().stream().map(AttachmentPhoto::getPhoto).collect(Collectors.toSet()));
         item.setRating(post.getRates().stream().map(Rate::getScore).count());
         return item;
     }
@@ -99,13 +99,12 @@ public class InfoPostService {
         return rez;
     }
 
-    private void setTags(InfoPost post, Set<String> tags) {
-        expandKnownTags(tags);
-        tagService.getTagsByNames(tags).forEach(post::addTag);
-    }
-
     public void insertPost(PostCreateRequest request) {
-        logger.info("tags from request first line:"+String.join(",", request.getTags()));
+        logger.info("tags from request first line:" + String.join(",", request.getTags()));
+        logger.info("text:" + request.getText());
+        logger.info("topic:" + request.getTopic());
+        logger.info("theme:" + request.getTheme());
+        logger.info("photo:" + request.getPhotos().stream().map(Photo::getDeleteLink).collect(Collectors.joining(", ")));
         var post = new InfoPost();
         var now = Timestamp.valueOf(LocalDateTime.now());
         post.setAuthorId(appUserDetailsService.getById(Utility.getCurrentUser().getId()));
@@ -115,6 +114,7 @@ public class InfoPostService {
         tagService.getTagsByNames(request.getTags()).forEach(post::addTag);
         post.setTheme(themeService.getByName(request.getTheme()));
         post.setTopic(request.getTopic());
+        logger.info("tags from request first line:" + String.join(",", request.getTags()));
         post.setText(request.getText());
         post.setCreationDate(now);
         infoPostRepo.save(post);
@@ -125,9 +125,11 @@ public class InfoPostService {
         if (StringUtils.hasText(request.getText()))
             post.setText(request.getText());
         post.getTags().clear();
-        if (request.getTags().size() > 0)
-            setTags(post, request.getTags());
-        post.getPhotos().clear();
+        if (request.getTags().size() > 0) {
+            expandKnownTags(request.getTags());
+            tagService.getTagsByNames(request.getTags()).forEach(post::addTag);
+        }
+        post.getAttachmentPhotos().clear();
         if (request.getPhotos().size() > 0)
             Utility.photosToAttachments(request.getPhotos()).forEach(post::addPhoto);
         infoPostRepo.save(post);
@@ -139,8 +141,10 @@ public class InfoPostService {
     }
 
     private void expandKnownTags(Set<String> tags) {
-        var extras=new HashSet<>(tags);
-        if (extras.removeAll(knownTags)) {
+        var extras = new HashSet<>(tags);
+        extras.removeAll(knownTags);
+        if (extras.size() > 0) {
+            logger.info("extras" + String.join(",", extras));
             tagService.insertTags(extras);
             knownTags.addAll(extras);
         }

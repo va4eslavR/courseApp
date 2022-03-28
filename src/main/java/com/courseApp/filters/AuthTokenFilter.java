@@ -32,7 +32,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                     , bearer);
             if (bearer != null && jwtUtils.validateJwtToken(bearer)) {
                 String email = jwtUtils.getEmailFromToken(bearer);
-                logger.info("email from bearer from filter" + email);
+                logger.info("email from bearer from filter " + email);
                 var userDetails = userDetailsService.loadUserByUsername(email);
                 var authToken = new UsernamePasswordAuthenticationToken(userDetails, null,
                         userDetails.getAuthorities());

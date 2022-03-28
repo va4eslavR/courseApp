@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class AppUserDetailsService implements UserDetailsService {
@@ -47,7 +48,6 @@ public class AppUserDetailsService implements UserDetailsService {
         user.setName(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setLastSeen(Timestamp.valueOf(LocalDateTime.now()));
-        //user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         user.setPassword(signupRequest.getPassword());
         var roles = new HashSet<Role>();
         roles.add(roleRepo.findByRole(grantAdminRoles.getRole(signupRequest.getClaims())).orElseThrow());
@@ -60,7 +60,8 @@ public class AppUserDetailsService implements UserDetailsService {
         if (appUserRepo.existsByName(name)) return "name";
         return "success";
     }
-    public AppUser getById(String id){
+
+    public AppUser getById(String id) {
         return appUserRepo.getById(id);
     }
 

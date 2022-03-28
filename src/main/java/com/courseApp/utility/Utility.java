@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utility {
+
     public static AppUserDetails getCurrentUser() {
         return (AppUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
