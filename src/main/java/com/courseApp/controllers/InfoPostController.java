@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/info")
@@ -70,8 +71,9 @@ public class InfoPostController {
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     @GetMapping("/private")
-    public ResponseEntity<?> getAuthorizedPosts() {
-        return ResponseEntity.ok().body(infoPostService.getPrivatePosts());
+    public ResponseEntity<List<PrivatePostsResponse>> getAuthorizedPosts() {
+        var posts = infoPostService.getPrivatePosts();
+        return ResponseEntity.ok().body(posts);
     }
 
 }

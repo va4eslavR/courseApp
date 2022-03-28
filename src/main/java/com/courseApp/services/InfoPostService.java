@@ -74,6 +74,7 @@ public class InfoPostService {
                     .findFirst()
                     .orElse(null);
             item.setRate(rateVal == null ? 0 : rateVal.getScore());
+            logger.info("topic of each item" + item.getPublicPostsResponse().getTopic());
             return item;
         }).collect(Collectors.toList());
     }

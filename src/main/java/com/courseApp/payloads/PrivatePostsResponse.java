@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PrivatePostsResponse {
-    PublicPostsResponse publicPostsResponse;
-    Integer rate;
-    Boolean owner;
+   private PublicPostsResponse publicPostsResponse;
+   private Integer rate;
+   private Boolean owner;
 }
