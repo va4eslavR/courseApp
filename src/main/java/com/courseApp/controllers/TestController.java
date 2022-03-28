@@ -1,5 +1,6 @@
 package com.courseApp.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,15 +11,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test")
 public class TestController {
     @GetMapping("/all")
-    public String allAccess(){
+    public String allAccess() {
         return "Public Content";
     }
+
     @GetMapping("/user")
-    public String userAccess(){
+    public String userAccess() {
         return "User Content";
     }
-    @GetMapping ("/admin")
-    public String adminAccess(){
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public String adminAccess() {
         return "Admin Access";
     }
 }
